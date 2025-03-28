@@ -22,6 +22,7 @@ def fft_convolve2d(image, kernel):
     # Pad image and kernel to the output size
     fsize = (2 ** np.ceil(np.log2(size)).astype(int)).tolist()
     fslice = tuple([slice(0, s) for s in size])
+    print(fslice)
     
     # Pad arrays with zeros
     new_img = np.zeros(fsize)

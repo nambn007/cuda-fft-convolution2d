@@ -18,17 +18,22 @@ void pad_image(const float *input, int inH, int inW, float **output, int outH, i
 inline 
 void pad_kernel(const float *kernel, int kerH, int kerW, float **padded_kernel, int outH, int outW) {
     *padded_kernel = (float *)calloc(outH * outW, sizeof(float));
-    int offsetH = (outH - kerH) / 2;
-    int offsetW = (outW - kerW) / 2;
+    // int offsetH = (outH - kerH) / 2;
+    // int offsetW = (outW - kerW) / 2;
+    // for (int i = 0; i < kerH; ++i) {
+    //     memcpy((*padded_kernel) + (i + offsetH) * outW + offsetW, kernel + i * kerW, kerW * sizeof(float));
+    // } 
     for (int i = 0; i < kerH; ++i) {
-        memcpy((*padded_kernel) + (i + offsetH) * outW + offsetW, kernel + i * kerW, kerW * sizeof(float));
-    } 
+        memcpy((*padded_kernel) + i * outW, kernel + i * kerW, kerW * sizeof(float));
+    }
 }
 
 inline
 void crop_result(const float *input, int inH, int inW, int outH, int outW, float **cropped_result) {
+    printf("Crop result: %d %d %d %d\n", inH, inW, outH, outW);
     int offsetH = (inH - outH) / 2;
     int offsetW = (inW - outW) / 2;
+    printf("Offset: %d %d\n", offsetH, offsetW);    
     *cropped_result = (float *)calloc(outH * outW, sizeof(float));
     for (int i = 0; i < outH; ++i) {
         memcpy((*cropped_result) + i * outW, input + (i + offsetH) * inW + offsetW, outW * sizeof(float));

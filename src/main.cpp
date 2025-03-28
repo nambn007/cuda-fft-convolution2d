@@ -69,6 +69,7 @@ int main(int argc, char** argv) {
             std::cerr << "Cannot load image from path: " << img_path << "\n";
             return 1;
         }
+        save_image("input.jpg", image_h_buffer, img_h, img_w, img_c);
 
         // Calculate padding size
         const int pad_h = img_h + kernel_h - 1;        
@@ -85,7 +86,7 @@ int main(int argc, char** argv) {
         save_image("output_padding.jpg", h_result, pad_h, pad_w, img_c);
 
         float *h_cropped = nullptr;
-        crop_result(h_result, img_h, img_w, pad_h, pad_w, &h_cropped);
+        crop_result(h_result, pad_h, pad_w, img_h, img_w, &h_cropped);
 
         save_image("output.jpg", h_cropped, img_h, img_w, img_c);
     }

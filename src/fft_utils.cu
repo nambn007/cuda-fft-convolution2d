@@ -27,13 +27,6 @@ void fft_convolve_2d(const float *h_image, const float *h_kernel, float **h_resu
     cudaMalloc(&d_kernel_fft, complex_size);
     cudaMalloc(&d_output_fft, complex_size);
 
-    for (int i = 0; i < H * W; i++) {
-        if (h_kernel[i] != 0) {
-            std::cout << h_kernel[i] << " ";
-        }
-    } std::cout << std::endl;
-
-
     cudaMemcpy(d_image, h_image, real_size, cudaMemcpyHostToDevice);
     cudaMemcpy(d_kernel, h_kernel, real_size, cudaMemcpyHostToDevice);
 
@@ -56,14 +49,14 @@ void fft_convolve_2d(const float *h_image, const float *h_kernel, float **h_resu
     check_cufft_status(cufftExecC2R(inverse_plan, d_output_fft, d_output), "cufftExecC2R");
 
     // Normalize the result
-    float norm_factor = (H * W);
-    normalize<<<grid, block>>>(d_output, num_elements, norm_factor);
+    float norm_factor = 1.0f / (H * W);
+    int real_num_elements = H * W;
+    dim3 real_grid((real_num_elements + block.x - 1) / block.x);
+    normalize<<<real_grid, block>>>(d_output, real_num_elements, norm_factor);
 
     // Copy the result back to host
     *h_result = (float *)malloc(real_size);
     cudaMemcpy(*h_result, d_output, real_size, cudaMemcpyDeviceToHost);
-
-    save_image("output.png", *h_result, H, W, 3);
 
     // Clean up 
     cufftDestroy(forward_plan); cufftDestroy(inverse_plan);
@@ -90,6 +83,6 @@ __global__ void fft_pointwise_multiply(cufftComplex *A, cufftComplex *B, cufftCo
 __global__ void normalize(float *data, int size, float factor) {
     int idx = blockIdx.x * blockDim.x + threadIdx.x;
     if (idx < size) {
-        data[idx] /= factor;
+        data[idx] *= factor;
     }
 }
