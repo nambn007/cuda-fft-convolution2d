@@ -1,5 +1,5 @@
 #include "utils.h"
-
+#include <fstream>
 
 void load_image_from_path(const std::string& img_path, float **data, int *height, int *width, int *channels) {
     cv::Mat img = cv::imread(img_path, cv::IMREAD_COLOR);

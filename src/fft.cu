@@ -1,4 +1,4 @@
-#include "fft_utils.cuh"
+#include "fft.cuh"
 #include <cuda_runtime.h>
 #include <cufft.h>
 #include <iostream>
@@ -35,6 +35,7 @@ void fft_convolve_2d(const float *h_image, const float *h_kernel, float **h_resu
     check_cufft_status(cufftPlan2d(&forward_plan, H, W, CUFFT_R2C), "cufftPlan2d R2C");
     check_cufft_status(cufftPlan2d(&inverse_plan, H, W, CUFFT_C2R), "cufftPlan2d C2R");
 
+    auto start = std::chrono::high_resolution_clock::now();
     // FFT image and kernel 
     check_cufft_status(cufftExecR2C(forward_plan, d_image, d_image_fft), "cufftExecR2C image");
     check_cufft_status(cufftExecR2C(forward_plan, d_kernel, d_kernel_fft), "cufftExecR2C kernel");
@@ -53,6 +54,10 @@ void fft_convolve_2d(const float *h_image, const float *h_kernel, float **h_resu
     int real_num_elements = H * W;
     dim3 real_grid((real_num_elements + block.x - 1) / block.x);
     normalize<<<real_grid, block>>>(d_output, real_num_elements, norm_factor);
+
+    auto end = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double, std::milli> elapsed = end - start;
+    std::cout << "...CUDA-FFT Convolution time: " << elapsed.count() << " ms\n";
 
     // Copy the result back to host
     *h_result = (float *)malloc(real_size);

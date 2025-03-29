@@ -30,10 +30,18 @@ void pad_kernel(const float *kernel, int kerH, int kerW, float **padded_kernel, 
 
 inline
 void crop_result(const float *input, int inH, int inW, int outH, int outW, float **cropped_result) {
-    printf("Crop result: %d %d %d %d\n", inH, inW, outH, outW);
     int offsetH = (inH - outH) / 2;
     int offsetW = (inW - outW) / 2;
-    printf("Offset: %d %d\n", offsetH, offsetW);    
+    *cropped_result = (float *)calloc(outH * outW, sizeof(float));
+    for (int i = 0; i < outH; ++i) {
+        memcpy((*cropped_result) + i * outW, input + (i + offsetH) * inW + offsetW, outW * sizeof(float));
+    }
+}
+
+inline
+void crop_result(const double *input, int inH, int inW, int outH, int outW, float **cropped_result) {
+    int offsetH = (inH - outH) / 2;
+    int offsetW = (inW - outW) / 2;
     *cropped_result = (float *)calloc(outH * outW, sizeof(float));
     for (int i = 0; i < outH; ++i) {
         memcpy((*cropped_result) + i * outW, input + (i + offsetH) * inW + offsetW, outW * sizeof(float));
